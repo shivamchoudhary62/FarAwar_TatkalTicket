@@ -108,10 +108,13 @@ For full details on development workflows, constraints, and UI designs, refer to
 This repository includes the complete Tatkal Ticket Verified Booking Module implemented by Member 2. 
 
 ### Key Features Added:
+- **Official IRCTC Registration & Linking**: Set up your official IRCTC profile details (User ID, Email, DOB, Gender, Marital Status, Occupation, Address, PIN Code).
+- **Verified Co-Passenger Profile Auto-Fetch**: Enter a co-passenger's `irctc_id` to automatically fetch and verify their name, age, and gender. Identity parameters are read-only to prevent fake name manipulations.
+- **Seat & Meal Preferences**: Select seat berth preferences and meal options (VEG, NON-VEG, NONE) per passenger.
 - **Autofill Pre-Fill Booking Request**: Prefill passenger names and urgency score metrics to bypass manual form entry.
 - **Urgency Score Engine**: Automatic pure mathematical scoring (1-10) based on reason, supporting document status, and account age.
-- **Idempotent Scheduled Fire Job**: Simulates instant auto-booking submissions precisely on the Tatkal opening time window.
-- **Active Journey Overlap Locking**: Prevent multiple/duplicate bookings overlapping with an active passenger journey list.
+- **Idempotent Scheduled Fire Job**: Simulates instant auto-booking submissions precisely on the Tatkal opening time window (10:00 AM for AC: 2A/3A/CC/EC/3E, 11:00 AM for Sleeper/Non-AC: SL/FC/2S).
+- **Active Journey Overlap Locking**: Prevent multiple/duplicate bookings overlapping with an active passenger journey list (enforced on unique `irctc_id`s).
 - **Ticket Surrender Marketplace**: Allows passengers to list their tickets for cancellation and match them to other users in real-time.
 - **Handoff Documentation**: Comprehensive instructions for database, api routers, daemon scheduler, and mobile integration.
 
