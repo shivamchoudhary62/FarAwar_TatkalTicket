@@ -40,8 +40,8 @@ const prefillValidators = [
     }
     return true;
   }),
-  body('class').isIn(['SL', '3A', '2A', '1A', 'GEN']),
-  body('passengers').isArray({ min: 1, max: 6 })
+  body('class').isIn(['SL', '3A', '2A', '3E', 'CC', '2S', 'FC', 'EC', 'GEN']),
+  body('passengers').isArray({ min: 1, max: 4 }).withMessage('A maximum of 4 passengers are allowed for Tatkal bookings')
 ];
 
 // POST /api/tatkal/prefill
@@ -60,7 +60,7 @@ router.post('/prefill', verifyToken, prefillValidators, async (req, res) => {
     // Fetch user details
     const { data: user, error: userErr } = await supabase
       .from('users')
-      .select('name, created_at')
+      .select('name, created_at, irctc_id, dob, gender')
       .eq('id', userId)
       .single();
 
@@ -68,10 +68,66 @@ router.post('/prefill', verifyToken, prefillValidators, async (req, res) => {
       return sendError(res, userErr, 'USER_NOT_FOUND', 'User not found', 404, 'PREFILL_USER');
     }
 
-    // Passenger verification
-    const passCheck = validatePassengerList(req.body.passengers, user.name);
-    if (!passCheck.valid) {
-      return res.status(400).json({ error: passCheck.message, code: 'ACCOUNT_HOLDER_MANDATE_FAILED' });
+    if (!user.irctc_id) {
+      return res.status(400).json({
+        error: "You must complete your official IRCTC profile setup before booking.",
+        code: 'PROFILE_REQUIRED'
+      });
+    }
+
+    // Ensure the first passenger matches the booker's verified details
+    const firstPassenger = req.body.passengers[0];
+    if (!firstPassenger || firstPassenger.irctc_id !== user.irctc_id) {
+      return res.status(400).json({
+        error: "Account holder must be the primary passenger in the booking list.",
+        code: 'ACCOUNT_HOLDER_MANDATE_FAILED'
+      });
+    }
+
+    // Verify all passenger details against database profiles
+    for (const passenger of req.body.passengers) {
+      if (!passenger.irctc_id) {
+        return res.status(400).json({
+          error: "All passengers must have a valid registered IRCTC ID.",
+          code: 'PASSENGER_ID_REQUIRED'
+        });
+      }
+      
+      const { data: profile, error: profErr } = await supabase
+        .from('users')
+        .select('name, dob, gender')
+        .eq('irctc_id', passenger.irctc_id.trim())
+        .maybeSingle();
+
+      if (profErr || !profile) {
+        return res.status(400).json({
+          error: `Passenger with IRCTC ID '${passenger.irctc_id}' is not registered on RailSaathi.`,
+          code: 'PASSENGER_NOT_FOUND'
+        });
+      }
+
+      // Calculate age
+      let expectedAge = '';
+      if (profile.dob) {
+        const birthDate = new Date(profile.dob);
+        const today = new Date();
+        expectedAge = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+          expectedAge--;
+        }
+      }
+
+      const nameMatches = profile.name && passenger.name && (profile.name.trim().toLowerCase() === passenger.name.trim().toLowerCase());
+      const ageMatches = passenger.age && (Math.abs(parseInt(passenger.age) - expectedAge) <= 1);
+      const genderMatches = profile.gender && passenger.gender && (profile.gender.toLowerCase() === passenger.gender.toLowerCase());
+
+      if (!nameMatches || !ageMatches || !genderMatches) {
+        return res.status(400).json({
+          error: `Profile details mismatch for IRCTC ID '${passenger.irctc_id}'. Please re-fetch passenger details and try again.`,
+          code: 'PROFILE_MISMATCH'
+        });
+      }
     }
 
     // Format local booking_date as YYYY-MM-DD
@@ -212,6 +268,10 @@ router.use('/', requestsRouter);
 // Surrender sub-router: surrender market endpoints
 const surrenderRouter = require('./tatkal-surrenders');
 router.use('/', surrenderRouter);
+
+// Profiles sub-router: link profiles and search profiles
+const profilesRouter = require('./tatkal-profiles');
+router.use('/', profilesRouter);
 
 // TODO (Day 5): Tell Member 1 to add this line to index.js:
 // app.use('/api/tatkal', require('./routes/tatkal'))

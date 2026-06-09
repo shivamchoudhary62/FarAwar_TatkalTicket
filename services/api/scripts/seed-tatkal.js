@@ -28,6 +28,29 @@ async function main() {
       user2Id = users[1].id;
       user1Name = users[0].name;
       console.log(`[SEED] Using database users: ${users[0].name} (${user1Id}) and ${users[1].name} (${user2Id})`);
+
+      // Update test users with IRCTC profile credentials
+      await supabase.from('users').update({
+        irctc_id: 'raj_kumar',
+        dob: '1998-05-15',
+        gender: 'M',
+        email: 'raj@gmail.com',
+        address: '123 NDLS Road, Delhi',
+        pin_code: '110001',
+        state: 'Delhi',
+        city: 'New Delhi'
+      }).eq('id', user1Id);
+
+      await supabase.from('users').update({
+        irctc_id: 'suresh_kumar',
+        dob: '1980-08-20',
+        gender: 'M',
+        email: 'suresh@gmail.com',
+        address: '456 CSMT Lane, Mumbai',
+        pin_code: '400001',
+        state: 'Maharashtra',
+        city: 'Mumbai'
+      }).eq('id', user2Id);
     } else {
       console.warn('[SEED] Warning: Less than 2 users found in database. Inserting with placeholder UUIDs.');
     }
@@ -57,21 +80,21 @@ async function main() {
       {
         user_id: user1Id,
         from_station: 'NDLS', to_station: 'MMCT', travel_date: dayAfterStr, class: '3A',
-        passengers: [{ name: user1Name, age: 28, gender: 'M', berth_preference: 'LB' }],
+        passengers: [{ irctc_id: 'raj_kumar', name: user1Name, age: 28, gender: 'M', berth_preference: 'LB', verified: true }],
         is_urgent: true, urgency_reason: 'official', urgency_score: 7.5,
         scheduled_fire_time: tomorrowAt10, status: 'PENDING', booking_date: new Date()
       },
       {
         user_id: user2Id,
         from_station: 'CSMT', to_station: 'PUNE', travel_date: dayAfterStr, class: '2A',
-        passengers: [{ name: 'Suresh Kumar', age: 45, gender: 'M' }],
+        passengers: [{ irctc_id: 'suresh_kumar', name: 'Suresh Kumar', age: 45, gender: 'M', verified: true }],
         is_urgent: true, urgency_reason: 'bereavement', urgency_score: 8.0,
         scheduled_fire_time: tomorrowAt10, status: 'PENDING', booking_date: new Date()
       },
       {
         user_id: user1Id,
         from_station: 'BLR', to_station: 'HYD', travel_date: dayAfterStr, class: '3A',
-        passengers: [{ name: user1Name, age: 28, gender: 'M' }],
+        passengers: [{ irctc_id: 'raj_kumar', name: user1Name, age: 28, gender: 'M', verified: true }],
         is_urgent: true, urgency_reason: 'medical', urgency_score: 9.0,
         scheduled_fire_time: tomorrowAt10, status: 'PENDING', booking_date: new Date()
       },
@@ -79,14 +102,14 @@ async function main() {
       {
         user_id: user1Id,
         from_station: 'NDLS', to_station: 'MMCT', travel_date: prevDayStr, class: '3A',
-        passengers: [{ name: user1Name, age: 28, gender: 'M' }],
+        passengers: [{ irctc_id: 'raj_kumar', name: user1Name, age: 28, gender: 'M', verified: true }],
         scheduled_fire_time: new Date().toISOString(), status: 'CONFIRMED',
         simulated_pnr: 'DEMO847291', booking_date: prevDayStr
       },
       {
         user_id: user2Id,
         from_station: 'HWH', to_station: 'NDLS', travel_date: prevDayStr, class: 'SL',
-        passengers: [{ name: 'Ramesh Kumar', age: 33, gender: 'M' }],
+        passengers: [{ irctc_id: 'suresh_kumar', name: 'Suresh Kumar', age: 45, gender: 'M', verified: true }],
         scheduled_fire_time: new Date().toISOString(), status: 'CONFIRMED',
         simulated_pnr: 'DEMO102934', booking_date: prevDayStr
       },
@@ -94,33 +117,33 @@ async function main() {
       {
         user_id: user1Id,
         from_station: 'CSMT', to_station: 'PUNE', travel_date: dayAfterStr, class: '3A',
-        passengers: [{ name: user1Name, age: 28, gender: 'M' }],
+        passengers: [{ irctc_id: 'raj_kumar', name: user1Name, age: 28, gender: 'M', verified: true }],
         scheduled_fire_time: tomorrowAt10, status: 'CANCELLED', booking_date: new Date()
       },
       {
         user_id: user2Id,
         from_station: 'BLR', to_station: 'HYD', travel_date: dayAfterStr, class: 'SL',
-        passengers: [{ name: 'Aman Singh', age: 24, gender: 'M' }],
+        passengers: [{ irctc_id: 'suresh_kumar', name: 'Suresh Kumar', age: 45, gender: 'M', verified: true }],
         scheduled_fire_time: tomorrowAt10, status: 'CANCELLED', booking_date: new Date()
       },
       // 2 with status FAILED
       {
         user_id: user1Id,
         from_station: 'HWH', to_station: 'NDLS', travel_date: tomorrowStr, class: '3A',
-        passengers: [{ name: user1Name, age: 28, gender: 'M' }],
+        passengers: [{ irctc_id: 'raj_kumar', name: user1Name, age: 28, gender: 'M', verified: true }],
         scheduled_fire_time: new Date().toISOString(), status: 'FAILED', booking_date: prevDayStr
       },
       {
         user_id: user2Id,
         from_station: 'NDLS', to_station: 'MMCT', travel_date: tomorrowStr, class: 'SL',
-        passengers: [{ name: 'Rohit Sharma', age: 35, gender: 'M' }],
+        passengers: [{ irctc_id: 'suresh_kumar', name: 'Suresh Kumar', age: 45, gender: 'M', verified: true }],
         scheduled_fire_time: new Date().toISOString(), status: 'FAILED', booking_date: prevDayStr
       },
       // 1 with status PENDING, is_urgent = true, urgency_reason = 'medical', urgency_score = 9.5 (demo day flow)
       {
         user_id: user1Id,
         from_station: 'NDLS', to_station: 'MMCT', travel_date: dayAfterStr, class: '3A',
-        passengers: [{ name: user1Name, age: 28, gender: 'M' }],
+        passengers: [{ irctc_id: 'raj_kumar', name: user1Name, age: 28, gender: 'M', verified: true }],
         is_urgent: true, urgency_reason: 'medical', urgency_score: 9.5,
         scheduled_fire_time: tomorrowAt10, status: 'PENDING', booking_date: new Date()
       }

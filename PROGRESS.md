@@ -55,6 +55,13 @@ I am building the Tatkal module of RailSaathi. This includes:
 - [x] 2.30 — Created docs/WORKFLOW.md containing detailed User (Passenger) and System (Admin/Job) workflows with Mermaid flow diagrams.
 - [x] 2.31 — Aligned anti-hoarding rules with official IRCTC guidelines: unique index `idx_tatkal_one_per_day` and API checking updated to check `(user_id, booking_date, train_number)`. Allows booking different trains on the same booking date.
 - [x] 2.32 — Enforced NOT NULL constraints on train_number and class in tatkal_surrenders table definition and validated them on the API post handler.
+- [x] 2.33 — Enforced Tatkal booking rules: capped passengers to 4 per PNR, excluded First AC (1A) and mapped classes to appropriate opening times (10 AM for AC: 2A/3A/CC/EC/3E; 11 AM for Non-AC: SL/FC/2S) on backend and frontend.
+- [x] 2.34 — Implemented Terms & Conditions checkbox and a beautiful detailed rules modal inside UrgencyDetailsForm.js with charges table and cancellation/refund rules.
+- [x] 2.35 — Added official IRCTC sign-up and registration linking columns to users table and tatkal database schema in 002_tatkal.sql.
+- [x] 2.36 — Created tatkal-profiles.js sub-router with link-irctc profile verification and passenger-by-irctc lookup endpoints.
+- [x] 2.37 — Enforced strict backend profile integrity checks on PREFILL bookings (assert passenger name/age/gender match registered details).
+- [x] 2.38 — Implemented IrctcSignupModal.js with credentials, personal details, contact details, address, and simulated OTP verification.
+- [x] 2.39 — Integrated TatkalHomeScreen.js profile checking banner and PassengerCard.js verified auto-fetch display panels.
 
 
 

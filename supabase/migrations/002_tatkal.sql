@@ -1,6 +1,14 @@
--- 002_tatkal.sql
--- Run AFTER Member 1 has applied 001_core_schema.sql
--- Adds the Tatkal pre-fill system and surrender market tables
+-- Alter users table to add IRCTC registration fields
+ALTER TABLE users ADD COLUMN IF NOT EXISTS irctc_id VARCHAR(50) UNIQUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255) UNIQUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS dob DATE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS gender VARCHAR(10);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS marital_status VARCHAR(20);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS occupation VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS pin_code VARCHAR(10);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS state VARCHAR(50);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS city VARCHAR(50);
 
 -- Create tatkal_requests table
 CREATE TABLE tatkal_requests (

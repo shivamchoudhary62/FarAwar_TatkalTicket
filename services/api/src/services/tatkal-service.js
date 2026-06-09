@@ -42,7 +42,7 @@ function calculateUrgencyScore(reason, hasDocument, accountAgeMonths) {
  * @returns {Date} JavaScript Date object representing the fire time
  */
 function calculateFireTime(travelDate, trainClass) {
-  const isAC = ['1A', '2A', '3A'].includes(trainClass);
+  const isAC = ['2A', '3A', 'CC', 'EC', '3E'].includes(trainClass);
   const fireHour = isAC ? 10 : 11;
 
   // Split travelDate manually to prevent timezone/parsing differences
@@ -216,32 +216,23 @@ async function resolvePassengerUserIds(passengers, supabase) {
     return [];
   }
 
-  const names = passengers
-    .filter(p => p && typeof p.name === 'string')
-    .map(p => p.name.trim().toLowerCase());
+  const ids = passengers
+    .filter(p => p && typeof p.irctc_id === 'string')
+    .map(p => p.irctc_id.trim());
 
-  if (names.length === 0) return [];
+  if (ids.length === 0) return [];
 
-  // Supabase doesn't support ilike with IN, so we query all and filter
   const { data: users, error } = await supabase
     .from('users')
-    .select('id, name');
+    .select('id')
+    .in('irctc_id', ids);
 
   if (error) {
     console.error('[RESOLVE_PASSENGERS] Query failed:', error);
     throw new Error('Passenger user resolution failed');
   }
 
-  if (!users) return [];
-
-  const matchedIds = [];
-  for (const user of users) {
-    if (user.name && names.includes(user.name.trim().toLowerCase())) {
-      matchedIds.push(user.id);
-    }
-  }
-
-  return matchedIds;
+  return (users || []).map(u => u.id);
 }
 
 module.exports = {

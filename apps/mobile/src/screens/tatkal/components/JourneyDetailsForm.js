@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const CLASS_OPTIONS = ['SL', '3A', '2A', '1A', 'GEN'];
+const CLASS_OPTIONS = ['SL', '3A', '2A', 'CC', '2S', 'FC', 'EC'];
 
 export default function JourneyDetailsForm({ formData, setFormData }) {
   const [showDatePicker, setShowDatePicker] = useState(false);

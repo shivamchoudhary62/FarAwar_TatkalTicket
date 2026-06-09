@@ -17,7 +17,7 @@ const surrenderValidators = [
   body('to_station').notEmpty().isLength({ max: 7 }).trim().toUpperCase(),
   body('train_number').notEmpty().isLength({ max: 10 }).trim().withMessage('train_number is required'),
   body('travel_date').isISO8601(),
-  body('class').isIn(['SL', '3A', '2A', '1A', 'GEN'])
+  body('class').isIn(['SL', '3A', '2A', '3E', 'CC', '2S', 'FC', 'EC', 'GEN'])
 ];
 
 // POST /api/tatkal/surrender

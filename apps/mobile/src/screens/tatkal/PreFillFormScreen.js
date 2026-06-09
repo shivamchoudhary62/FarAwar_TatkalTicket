@@ -28,6 +28,7 @@ export default function PreFillFormScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [overlapError, setOverlapError] = useState(null);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -48,7 +49,15 @@ export default function PreFillFormScreen() {
       setFormData(prev => ({
         ...prev,
         class: currentUser.preferred_class || '3A',
-        passengers: [{ name: currentUser.name || '', age: '', gender: 'M', berth_preference: '' }]
+        passengers: [{
+          irctc_id: currentUser.irctc_id || '',
+          name: currentUser.name || '',
+          age: currentUser.age || '',
+          gender: currentUser.gender || 'M',
+          berth_preference: '',
+          meal_preference: 'NONE',
+          verified: !!currentUser.irctc_id
+        }]
       }));
     }
   }, [currentUser]);
@@ -68,11 +77,21 @@ export default function PreFillFormScreen() {
       if (invalid) {
         return setError('Please enter a valid name and age for every passenger.');
       }
+      const unverified = formData.passengers.some(p => !p.verified);
+      if (unverified) {
+        return setError('All passengers must have a verified IRCTC profile. Please enter their IRCTC ID and fetch details.');
+      }
+      if (formData.passengers.length > 4) {
+        return setError('A maximum of 4 passengers are allowed for Tatkal bookings.');
+      }
       setStep(3);
     }
   };
 
   const handleSubmit = async () => {
+    if (!agreedToTerms) {
+      return setError('You must agree to the Tatkal Booking Terms & Conditions before submitting.');
+    }
     try {
       setLoading(true);
       setError(null);
@@ -167,7 +186,14 @@ export default function PreFillFormScreen() {
           />
         )}
 
-        {step === 3 && <UrgencyDetailsForm formData={formData} setFormData={setFormData} />}
+        {step === 3 && (
+          <UrgencyDetailsForm
+            formData={formData}
+            setFormData={setFormData}
+            agreedToTerms={agreedToTerms}
+            setAgreedToTerms={setAgreedToTerms}
+          />
+        )}
 
         {/* Navigation Buttons */}
         <View style={styles.footer}>

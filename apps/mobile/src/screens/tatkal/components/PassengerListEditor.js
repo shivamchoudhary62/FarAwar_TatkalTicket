@@ -12,8 +12,8 @@ export default function PassengerListEditor({ passengers, onChangePassengers, ac
   };
 
   const addPassenger = () => {
-    if (passengers.length >= 6) return;
-    const updated = [...passengers, { name: '', age: '', gender: 'M', berth_preference: '' }];
+    if (passengers.length >= 4) return;
+    const updated = [...passengers, { irctc_id: '', name: '', age: '', gender: 'M', berth_preference: '', meal_preference: 'NONE', verified: false }];
     onChangePassengers(updated);
   };
 
@@ -27,7 +27,7 @@ export default function PassengerListEditor({ passengers, onChangePassengers, ac
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.sectionHeading}>Passenger Details</Text>
-        <Text style={styles.countText}>{passengers.length} of 6 passengers</Text>
+        <Text style={styles.countText}>{passengers.length} of 4 passengers</Text>
       </View>
 
       <ScrollView scrollEnabled={false} style={styles.scroll}>
@@ -43,7 +43,7 @@ export default function PassengerListEditor({ passengers, onChangePassengers, ac
         ))}
       </ScrollView>
 
-      {passengers.length < 6 && (
+      {passengers.length < 4 && (
         <TouchableOpacity style={styles.addBtn} onPress={addPassenger}>
           <UserPlus color="#E8621A" size={18} style={styles.addIcon} />
           <Text style={styles.addBtnText}>Add Passenger</Text>

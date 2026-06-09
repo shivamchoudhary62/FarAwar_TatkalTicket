@@ -152,3 +152,27 @@ export const getMyLocks = async () => {
     throw error;
   }
 };
+
+/**
+ * Links a verified IRCTC account details to user profile.
+ */
+export const linkIrctcProfile = async (data) => {
+  try {
+    const response = await apiClient.post('/tatkal/link-irctc', data);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
+ * Auto-fetches co-passenger details by IRCTC ID.
+ */
+export const getPassengerByIrctc = async (irctcId) => {
+  try {
+    const response = await apiClient.get(`/tatkal/passenger-by-irctc/${irctcId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

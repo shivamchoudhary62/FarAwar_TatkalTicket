@@ -13,8 +13,9 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Clock, ShieldAlert, ArrowRight, BookOpen } from 'lucide-react-native';
 
 // API Service & Custom Hook
-import { cancelRequest, getMyLocks } from './services/tatkalService';
+import { cancelRequest, getMyLocks, linkIrctcProfile } from './services/tatkalService';
 import useTatkal from './hooks/useTatkal';
+import IrctcSignupModal from './components/IrctcSignupModal';
 
 // Booking Status Card Component (Created in subsequent slice)
 import BookingStatusCard from './components/BookingStatusCard';
@@ -30,6 +31,25 @@ export default function TatkalHomeScreen() {
 
   const [locks, setLocks] = useState([]);
   const [locksExpanded, setLocksExpanded] = useState(false);
+  const [showSignupModal, setShowSignupModal] = useState(false);
+
+  const handleLinkProfile = async (profileData) => {
+    try {
+      await linkIrctcProfile(profileData);
+      setShowSignupModal(false);
+      Alert.alert('Success', 'Your IRCTC account has been successfully linked!');
+      if (currentUser) {
+        currentUser.irctc_id = profileData.irctc_id;
+        currentUser.dob = profileData.dob;
+        currentUser.gender = profileData.gender;
+      }
+      refetch();
+    } catch (err) {
+      console.error('[TatkalHomeScreen] Link profile error:', err);
+      Alert.alert('Error', err.response?.data?.error || 'Failed to link IRCTC profile.');
+      throw err;
+    }
+  };
 
   const fetchLocks = async () => {
     try {
@@ -138,19 +158,33 @@ export default function TatkalHomeScreen() {
           <Text style={styles.subtitle}>Book before 10 AM, beat the bots.</Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.primaryButton}
-          onPress={() => navigation.navigate('PreFillFormScreen')}
-        >
-          <Text style={styles.primaryButtonText}>Book Tatkal</Text>
-        </TouchableOpacity>
+        {!currentUser?.irctc_id ? (
+          <View style={styles.warningProfileCard}>
+            <Text style={styles.warningProfileTitle}>🔒 IRCTC Profile Required</Text>
+            <Text style={styles.warningProfileBody}>
+              To prevent proxy tout bookings, you must complete your official IRCTC account registration or profile linking before booking.
+            </Text>
+            <TouchableOpacity style={styles.warningProfileBtn} onPress={() => setShowSignupModal(true)}>
+              <Text style={styles.warningProfileBtnText}>Set Up IRCTC Profile</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={styles.primaryButton}
+              onPress={() => navigation.navigate('PreFillFormScreen')}
+            >
+              <Text style={styles.primaryButtonText}>Book Tatkal</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.outlineButton}
-          onPress={() => navigation.navigate('SurrenderMarketScreen')}
-        >
-          <Text style={styles.outlineButtonText}>Surrender Market</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.outlineButton}
+              onPress={() => navigation.navigate('SurrenderMarketScreen')}
+            >
+              <Text style={styles.outlineButtonText}>Surrender Market</Text>
+            </TouchableOpacity>
+          </>
+        )}
 
         <View style={styles.infoCard}>
           <Clock color="#E8621A" size={24} style={styles.infoIcon} />
@@ -188,6 +222,11 @@ export default function TatkalHomeScreen() {
             ))}
           </View>
         )}
+        <IrctcSignupModal
+          visible={showSignupModal}
+          onClose={() => setShowSignupModal(false)}
+          onSignupSuccess={handleLinkProfile}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -233,5 +272,12 @@ const styles = StyleSheet.create({
   lockRoute: { fontSize: 14, fontWeight: '700', color: '#111111', marginBottom: 4 },
   lockWindow: { fontSize: 12, color: '#555555', marginBottom: 6 },
   pnrBadge: { backgroundColor: '#FFF3EC', borderRadius: 8, paddingVertical: 3, paddingHorizontal: 8, alignSelf: 'flex-start' },
-  pnrBadgeText: { fontSize: 11, fontWeight: '600', color: '#E8621A', fontFamily: 'Courier New' }
+  pnrBadgeText: { fontSize: 11, fontWeight: '600', color: '#E8621A', fontFamily: 'Courier New' },
+  
+  // Warning Card Styles
+  warningProfileCard: { backgroundColor: '#FFF3EC', borderRadius: 14, padding: 18, marginBottom: 20, borderWidth: 1.5, borderColor: '#E8621A', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 6, elevation: 3 },
+  warningProfileTitle: { fontSize: 16, fontWeight: '700', color: '#E8621A', marginBottom: 8 },
+  warningProfileBody: { fontSize: 13, color: '#555555', lineHeight: 18, marginBottom: 16 },
+  warningProfileBtn: { backgroundColor: '#E8621A', borderRadius: 10, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
+  warningProfileBtnText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' }
 });

@@ -93,24 +93,20 @@ const firePendingRequests = async () => {
         try {
           const passengerUserIds = [req.user_id];
 
-          // Best-effort lookup: match co-passenger names to RailSaathi accounts
-          // Production would use Aadhaar/IRCTC ID linkage instead of name matching
           if (Array.isArray(req.passengers) && req.passengers.length > 0) {
-            const passengerNames = req.passengers
-              .filter(p => p && typeof p.name === 'string')
-              .map(p => p.name.trim());
+            const passengerIrctcIds = req.passengers
+              .filter(p => p && typeof p.irctc_id === 'string')
+              .map(p => p.irctc_id.trim());
 
-            if (passengerNames.length > 0) {
+            if (passengerIrctcIds.length > 0) {
               const { data: matchedUsers } = await supabase
                 .from('users')
-                .select('id, name');
+                .select('id')
+                .in('irctc_id', passengerIrctcIds);
 
               if (matchedUsers) {
                 matchedUsers.forEach(u => {
-                  const matched = passengerNames.some(
-                    pName => pName.toLowerCase() === (u.name || '').trim().toLowerCase()
-                  );
-                  if (matched && !passengerUserIds.includes(u.id)) {
+                  if (u.id && !passengerUserIds.includes(u.id)) {
                     passengerUserIds.push(u.id);
                   }
                 });
