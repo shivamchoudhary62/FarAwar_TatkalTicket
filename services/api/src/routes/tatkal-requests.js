@@ -115,6 +115,8 @@ router.get('/:id', verifyToken, async (req, res) => {
   } catch (err) {
     return sendError(res, err, 'SERVER_ERROR', 'An unexpected error occurred.', 500, 'GET_BY_ID_UNCAUGHT');
   }
+});
+
 // POST /api/tatkal/fire/:id (demo fire simulation endpoint)
 router.post('/fire/:id', verifyToken, async (req, res) => {
   try {

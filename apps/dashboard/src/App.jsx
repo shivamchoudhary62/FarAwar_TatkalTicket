@@ -5,6 +5,7 @@ import ComplaintMapPage from './pages/ComplaintMapPage';
 import SafetyPage from './pages/SafetyPage';
 import DemandPage from './pages/DemandPage';
 import StationPage from './pages/StationPage';
+import TatkalPage from './pages/TatkalPage';
 import './index.css';
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/safety" element={<SafetyPage />} />
           <Route path="/demand" element={<DemandPage />} />
           <Route path="/station" element={<StationPage />} />
+          <Route path="/tatkal" element={<TatkalPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

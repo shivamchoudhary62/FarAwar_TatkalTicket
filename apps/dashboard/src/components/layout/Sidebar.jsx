@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Map, ShieldAlert, TrendingUp, Building2 } from 'lucide-react';
+import { LayoutDashboard, Map, ShieldAlert, TrendingUp, Building2, Clock } from 'lucide-react';
 
 export default function Sidebar() {
   const navItems = [
@@ -8,6 +8,7 @@ export default function Sidebar() {
     { path: '/safety', label: 'Safety Incidents', icon: ShieldAlert },
     { path: '/demand', label: 'Demand Forecast', icon: TrendingUp },
     { path: '/station', label: 'Station Status', icon: Building2 },
+    { path: '/tatkal', label: 'Tatkal Queue', icon: Clock },
   ];
 
   return (
